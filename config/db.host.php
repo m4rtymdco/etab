@@ -5,5 +5,5 @@
  * Example: srv1234567.hstgr.io  (not localhost)
  */
 return [
-    'host' => '',
+    'host' => 'srv1320.hstgr.io',
 ];
