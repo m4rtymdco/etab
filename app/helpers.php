@@ -61,10 +61,28 @@ function flash(string $key, $value = null)
 
 function csrf_token(): string
 {
+    $cookie = (string) ($_COOKIE['etab_csrf'] ?? '');
+    if ($cookie !== '' && preg_match('/^[a-f0-9]{64}$/', $cookie)) {
+        $_SESSION['_csrf'] = $cookie;
+        return $cookie;
+    }
     if (empty($_SESSION['_csrf'])) {
         $_SESSION['_csrf'] = bin2hex(random_bytes(32));
     }
-    return $_SESSION['_csrf'];
+    $token = (string) $_SESSION['_csrf'];
+    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    if (!headers_sent()) {
+        setcookie('etab_csrf', $token, [
+            'expires' => 0,
+            'path' => '/',
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+    $_COOKIE['etab_csrf'] = $token;
+    return $token;
 }
 
 function csrf_field(): string
@@ -74,8 +92,9 @@ function csrf_field(): string
 
 function verify_csrf(): void
 {
-    $token = $_POST['_csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (!hash_equals($_SESSION['_csrf'] ?? '', (string) $token)) {
+    $posted = (string) ($_POST['_csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+    $known = (string) ($_COOKIE['etab_csrf'] ?? $_SESSION['_csrf'] ?? '');
+    if ($posted === '' || $known === '' || !hash_equals($known, $posted)) {
         http_response_code(419);
         echo 'Invalid CSRF token.';
         exit;
