@@ -156,7 +156,12 @@ if ($isCli) {
       <p>Delete <code>install.php</code> after setup on a shared host.</p>
     <?php else: ?>
       <p>This will create the <code><?= htmlspecialchars($db['name']) ?></code> database on <code><?= htmlspecialchars($db['host']) ?></code> and seed demo users.</p>
-      <?php if ($error): ?><p class="err"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+      <?php if ($error): ?>
+        <p class="err"><?= htmlspecialchars($error) ?></p>
+        <?php if (str_contains($error, '1045') || str_contains(strtolower($error), 'access denied')): ?>
+          <p>Hostinger is blocking this Vercel IP. In hPanel open <strong>Databases → Remote MySQL</strong>, add host <code>%</code> (Any Host), then wait a minute and try again. Also confirm the MySQL password in <code>config/db.host.php</code> matches hPanel → Databases.</p>
+        <?php endif; ?>
+      <?php endif; ?>
       <form method="post"><button type="submit">Install now</button></form>
     <?php endif; ?>
   </div>
