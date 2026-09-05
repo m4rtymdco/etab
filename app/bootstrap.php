@@ -8,6 +8,10 @@ if (PHP_SAPI !== 'cli') {
     if ($detectedBase === '/' || $detectedBase === '.' || $detectedBase === '\\') {
         $detectedBase = '';
     }
+    // Vercel runs PHP from /api/index.php — do not prefix URLs with /api.
+    if (getenv('VERCEL') === '1' || str_contains($script, '/api/')) {
+        $detectedBase = '';
+    }
     if (!getenv('ETAB_BASE_PATH')) {
         $GLOBALS['config']['base_path'] = $detectedBase;
     }
