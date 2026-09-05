@@ -6,16 +6,43 @@
 if (!function_exists('etab_env')) {
     function etab_env(string $key, ?string $default = null): ?string
     {
-        foreach ([$_SERVER[$key] ?? null, $_ENV[$key] ?? null] as $value) {
-            if (is_string($value) && $value !== '') {
-                return $value;
+        static $dotenv = null;
+        if ($dotenv === null) {
+            $dotenv = [];
+            $envFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
+            if (is_readable($envFile)) {
+                foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+                    $line = trim($line);
+                    if ($line === '' || str_starts_with($line, '#')) {
+                        continue;
+                    }
+                    if (!str_contains($line, '=')) {
+                        continue;
+                    }
+                    [$k, $v] = explode('=', $line, 2);
+                    $dotenv[trim($k)] = trim($v, " \t\"'");
+                }
+            }
+        }
+        foreach ([$_SERVER[$key] ?? null, $_ENV[$key] ?? null, $dotenv[$key] ?? null] as $value) {
+            if (is_string($value) && trim($value) !== '') {
+                return trim($value);
             }
         }
         $g = getenv($key);
-        if (is_string($g) && $g !== '') {
-            return $g;
+        if (is_string($g) && trim($g) !== '') {
+            return trim($g);
         }
         return $default;
+    }
+}
+
+$fileHost = '';
+$hostFile = __DIR__ . DIRECTORY_SEPARATOR . 'db.host.php';
+if (is_readable($hostFile)) {
+    $hostCfg = require $hostFile;
+    if (is_array($hostCfg)) {
+        $fileHost = trim((string) ($hostCfg['host'] ?? ''));
     }
 }
 
@@ -55,6 +82,9 @@ if (!$onHostinger) {
 }
 
 $dbHost = etab_env('ETAB_DB_HOST');
+if ($fileHost !== '' && !in_array($fileHost, ['localhost', '127.0.0.1'], true)) {
+    $dbHost = $fileHost;
+}
 if ($onVercel && ($dbHost === null || $dbHost === '' || in_array($dbHost, ['localhost', '127.0.0.1'], true))) {
     $dbHost = '';
 }
