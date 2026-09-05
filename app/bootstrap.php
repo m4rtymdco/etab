@@ -52,6 +52,7 @@ spl_autoload_register(function ($class) {
         'CriteriaController' => '/app/Controllers/CriteriaController.php',
         'ResultsController' => '/app/Controllers/ResultsController.php',
         'JudgeController' => '/app/Controllers/JudgeController.php',
+        'CookieSessionHandler' => '/app/CookieSessionHandler.php',
     ];
     if (isset($map[$class])) {
         require_once dirname(__DIR__) . $map[$class];
@@ -63,8 +64,14 @@ require_once dirname(__DIR__) . '/app/helpers.php';
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_name($GLOBALS['config']['session_name'] ?? 'etab_session');
     $cookiePath = $GLOBALS['config']['base_path'] ?: '/';
+    $onVercel = (($_SERVER['VERCEL'] ?? '') === '1')
+        || str_contains(strtolower((string) ($_SERVER['HTTP_HOST'] ?? '')), 'vercel.app');
+    if ($onVercel) {
+        $cookiePath = '/';
+        session_set_save_handler(new CookieSessionHandler(), true);
+    }
     session_set_cookie_params([
-        'lifetime' => 0,
+        'lifetime' => $onVercel ? 86400 * 7 : 0,
         'path' => $cookiePath,
         'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'),
