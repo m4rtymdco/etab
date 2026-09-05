@@ -1,16 +1,29 @@
 {
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.7.4",
-      "includeFiles": "{app,config,views,database,public}/**"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "vercel-php@0.7.4",
+      "config": {
+        "includeFiles": ["app/**", "config/**", "views/**", "database/**", "public/**", "index.php"]
+      }
     },
-    "api/install.php": {
-      "runtime": "vercel-php@0.7.4",
-      "includeFiles": "{app,config,views,database}/**"
+    {
+      "src": "api/install.php",
+      "use": "vercel-php@0.7.4",
+      "config": {
+        "includeFiles": ["config/**", "database/**", "install.php"]
+      }
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
-  },
-  "rewrites": [
-    { "source": "/install.php", "destination": "/api/install.php" },
-    { "source": "/((?!public/).*)", "destination": "/api/index.php" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/public/(.*)", "dest": "/public/$1" },
+    { "src": "/install.php", "dest": "/api/install.php" },
+    { "src": "/(.*)", "dest": "/api/index.php" }
   ]
 }
