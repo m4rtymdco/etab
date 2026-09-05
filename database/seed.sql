@@ -1,0 +1,2 @@
+-- Optional sample data is created by install.php.
+-- This file is a placeholder for extra seeds after a schema-only import.
