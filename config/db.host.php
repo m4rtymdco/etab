@@ -1,9 +1,11 @@
 <?php
 /**
- * Vercel often does not pass dashboard env vars into PHP.
- * Paste the hostname from Hostinger → Databases → Remote MySQL.
- * Example: srv1234567.hstgr.io  (not localhost)
+ * Hostinger remote MySQL (used on Vercel).
+ * Hostinger → Databases → Remote MySQL must allow Any Host (%).
  */
 return [
     'host' => 'srv1320.hstgr.io',
+    'name' => 'u934483906_etab',
+    'user' => 'u934483906_etab',
+    'pass' => 'eTab1234',
 ];
