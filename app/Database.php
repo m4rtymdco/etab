@@ -19,7 +19,7 @@ class Database
             $onVercel = (($_SERVER['VERCEL'] ?? '') === '1') || str_contains($httpHost, 'vercel.app');
             if ($onVercel && ($c['host'] === '' || in_array($c['host'], ['localhost', '127.0.0.1'], true))) {
                 throw new PDOException(
-                    'ETAB_DB_HOST is missing or still localhost. In Vercel → Settings → Environment Variables add ETAB_DB_HOST = your Hostinger hostname (srv….hstgr.io), apply it to Production, then Redeploy.'
+                    'MySQL host is still empty/localhost. Open config/db.host.php, set host to your Hostinger Remote MySQL hostname (srv….hstgr.io), upload that file, and Redeploy. Do not use localhost.'
                 );
             }
             self::$pdo = new PDO($dsn, $c['user'], $c['pass'], [
