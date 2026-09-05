@@ -38,11 +38,19 @@ if (!function_exists('etab_env')) {
 }
 
 $fileHost = '';
+$fileName = '';
+$fileUser = '';
+$filePass = null;
 $hostFile = __DIR__ . DIRECTORY_SEPARATOR . 'db.host.php';
 if (is_readable($hostFile)) {
     $hostCfg = require $hostFile;
     if (is_array($hostCfg)) {
         $fileHost = trim((string) ($hostCfg['host'] ?? ''));
+        $fileName = trim((string) ($hostCfg['name'] ?? ''));
+        $fileUser = trim((string) ($hostCfg['user'] ?? ''));
+        if (array_key_exists('pass', $hostCfg) && is_string($hostCfg['pass']) && $hostCfg['pass'] !== '') {
+            $filePass = $hostCfg['pass'];
+        }
     }
 }
 
@@ -105,9 +113,9 @@ return [
     'db' => [
         'host' => $dbHost !== null && $dbHost !== '' ? $dbHost : ($onVercel ? '' : 'localhost'),
         'port' => etab_env('ETAB_DB_PORT', '3306'),
-        'name' => etab_env('ETAB_DB_NAME', 'u934483906_etab'),
-        'user' => etab_env('ETAB_DB_USER', 'u934483906_etab'),
-        'pass' => etab_env('ETAB_DB_PASS', 'eTab1234'),
+        'name' => $fileName !== '' ? $fileName : etab_env('ETAB_DB_NAME', 'u934483906_etab'),
+        'user' => $fileUser !== '' ? $fileUser : etab_env('ETAB_DB_USER', 'u934483906_etab'),
+        'pass' => $filePass !== null ? $filePass : etab_env('ETAB_DB_PASS', 'eTab1234'),
         'charset' => 'utf8mb4',
     ],
     'mail' => [
