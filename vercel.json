@@ -9,10 +9,8 @@
       "includeFiles": "{app,config,views,database}/**"
     }
   },
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/public/(.*)", "dest": "/public/$1" },
-    { "src": "/install.php", "dest": "/api/install.php" },
-    { "src": "/(.*)", "dest": "/api/index.php" }
+  "rewrites": [
+    { "source": "/install.php", "destination": "/api/install.php" },
+    { "source": "/((?!public/).*)", "destination": "/api/index.php" }
   ]
 }
